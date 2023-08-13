@@ -1,0 +1,35 @@
+version: '3.4'
+
+services:
+  shoppingcart.api:
+    container_name: shoppingcart.api
+    restart: always
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    ports:
+      - "5006:80"
+      - "50001:50001"
+  
+  shoppingcartDb:
+    container_name: shoppingcartDb
+    restart: always
+    ports:
+      - "6379:6379"
+  
+  shoppingcart.api.dapr:
+    container_name: shoppingcart.api.dapr
+    command: ["./daprd",
+      "-app-id", "shoppingcart.api",
+      "-app-port", "80",
+      "-components-path", "/components",
+      "-placement-host-address", "dapr-placement:50002",
+      "-components-path", "/components",
+      ]
+    volumes:
+      - "./components/:/components"
+  
+  dapr-placement:
+    container_name: dapr_placement
+    command: ["./placement", "-port", "50001", "-log-level", "debug"]
+    ports:
+      - "50002:50000"
