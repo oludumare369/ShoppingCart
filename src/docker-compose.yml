@@ -1,0 +1,20 @@
+version: '3.4'
+
+services:
+  shoppingcartDb:
+    image: redis:alpine
+
+  shoppingcart.api:
+    image: ${DOCKER_REGISTRY-}shoppingcartapi
+    build:
+      context: .
+      dockerfile: Service/ShoppingCart.API/Dockerfile
+
+  shoppingcart.api.dapr:
+    image: daprio/dapr:1.7.3
+    network_mode: "service:shoppingcart.api"
+    depends_on:
+      - shoppingcart.api
+  
+  dapr-placement:
+    image: daprio/dapr:1.7.3 
